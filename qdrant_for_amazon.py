@@ -11,7 +11,7 @@ co = cohere.Client("In30uIWlPuaZKU3hIaE0vjka8u0Vvd0MyPmgItAD")
 client = QdrantClient("localhost", port=6333)
 
 # Load dataframe
-df_eng = pd.read_csv("results_french.csv", names=['title','comment','rating'])
+df_eng = pd.read_csv("results.csv", names=['title','comment','rating'])
 df_eng['language'] = 'English'
 df_fre = pd.read_csv("results_french.csv", names=['title','comment','rating'])
 df_fre['language'] = 'French'
