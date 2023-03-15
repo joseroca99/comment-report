@@ -2,7 +2,7 @@
 import pandas as pd
 import cohere
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import PointStruct
+from qdrant_client.http.models import PointStruct, VectorParams, Distance
 from pathlib import Path
 
 # Create Cohere client
@@ -17,6 +17,11 @@ with open(KEY_DIR) as f:
 qdrant_client = QdrantClient(
     url="https://f8748584-23d6-497d-8831-1265fbb636ff.us-east-1-0.aws.cloud.qdrant.io:6333", 
     api_key=SECRET_KEY,
+)
+#recreates collection in qdrant cloud
+qdrant_client.recreate_collection(
+    collection_name="test_collection",
+    vectors_config=VectorParams(size=768, distance=Distance.DOT),
 )
 
 # Load dataframe
@@ -49,17 +54,18 @@ for index, row in df_eng.iterrows():
         PointStruct(id=index, vector=df.loc[index,'vector'], payload = {'language':df.loc[index,'language']})
     )
 
-# operation_info = qdrant_client.upsert(
-#     collection_name="animal",
-#     wait=True,
-#     points=points,
-# )
+# uploads vectors to qdrant cloud
+operation_info = qdrant_client.upsert(
+    collection_name="test_collection",
+    wait=True,
+    points=points,
+)
 
 searcher = input('search term: ')
 vector_search = co.embed(texts=[searcher,], model="multilingual-22-12").embeddings[0]
 
 search_result = qdrant_client.search(
-    collection_name="animal",
+    collection_name="test_collection",
     query_vector=vector_search, 
     limit=5,
 )
