@@ -2,7 +2,7 @@
 import pandas as pd
 import cohere
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import PointStruct, VectorParams, Distance
+from qdrant_client.http.models import PointStruct, VectorParams, Distance, Filter, MatchValue, FieldCondition
 from pathlib import Path
 
 # Create Cohere client
@@ -18,6 +18,7 @@ qdrant_client = QdrantClient(
     url="https://f8748584-23d6-497d-8831-1265fbb636ff.us-east-1-0.aws.cloud.qdrant.io:6333", 
     api_key=SECRET_KEY,
 )
+
 #recreates collection in qdrant cloud
 qdrant_client.recreate_collection(
     collection_name="test_collection",
@@ -64,12 +65,28 @@ operation_info = qdrant_client.upsert(
 searcher = input('search term: ')
 vector_search = co.embed(texts=[searcher,], model="multilingual-22-12").embeddings[0]
 
-search_result = qdrant_client.search(
+languages = set(df.loc[:,'language'])
+for word in languages:
+    print('***'+word+'***')
+    search_result = qdrant_client.search(
     collection_name="test_collection",
     query_vector=vector_search, 
-    limit=5,
-)
-result_vectors = [result.id for result in search_result]
-for id in result_vectors:
+    query_filter=Filter(
+        must=[
+            FieldCondition(
+                key="language",
+                match=MatchValue(value=word)
+            )
+        ]
+    ),
+    limit=3
+    )
+    result_vectors = [result.id for result in search_result]
+    for id in result_vectors:
+        print(df.loc[id,'comment'])
 
-    print(df.loc[id,'comment'])
+# search_result = qdrant_client.search(
+#     collection_name="test_collection",
+#     query_vector=vector_search, 
+#     limit=8,
+# )
