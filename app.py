@@ -5,6 +5,7 @@ import requests
 from qdrant_client import QdrantClient
 import pandas as pd
 from qdrant_client.http.models import Distance, VectorParams, Filter, FieldCondition, MatchValue
+from flask_cors import CORS
 
 
 df_eng = pd.read_csv("results.csv", names=['title','comment','rating'])
@@ -16,7 +17,7 @@ df=df.dropna(subset=['comment']).reset_index(drop=True)
 
 # Creating a flask app
 app = Flask(__name__)
-
+CORS(app)
 # Initializing cohere client with API key
 co = cohere.Client("tcVXdIMkW51aFc3Lg1JA8Iv0LRr5NqNzbq8HAtRO")
 
