@@ -3,3 +3,4 @@ flask
 cohere
 qdrant_client
 gunicorn
+flask-cors
